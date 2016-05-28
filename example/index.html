@@ -7,8 +7,8 @@ body {
 	padding-left: 120px;		/* Bump world along 40$ or so to account for extra width of diagonal when rotated */
 }
 .container {
-	width: 300px;
-	height: 300px;
+	width: 400px;
+	height: 400px;
 }
 	</style>
 </head>
@@ -18,32 +18,42 @@ body {
 
 	<script>
 
-var world, container, renderer;	// Convenience in debugging
+var world, container, renderer, assets;	// Convenience in debugging
 
-require(['../world.js', '../dom-renderer.js'], function(World, Renderer) {
+require(['../world.js', '../dom-renderer.js', '../asset-library.js'], function(World, Renderer, Assets) {
 	container = document.querySelector(".container");
 	world = new World(10, 10);
 	renderer = Renderer;
+	assets = Assets;
 
-	renderer.init(container, world);
+	renderer.init(container, world, assets);
 
 	var player = {
 		id: "player",
 		x: 1,
 		z: 0,
-		element: renderer.createObjectElement("pin.png", "#0080ff")
+		element: renderer.createObjectElement("player", "#0080ff")
 	};
 	container.appendChild(player.element);
 	world.add(player);
 
-	var object = {
-		id: "building",
-		x: 3,
-		z: 4,
-		element: renderer.createObjectElement("building.png", "#c0c0c0")
-	};
-	container.appendChild(object.element);
-	world.add(object);
+	for(var i=0; i<10; i++) {
+		var x, z;
+		do {
+			x = Math.floor(Math.random()*10);
+			z = Math.floor(Math.random()*10);
+		}
+		while(typeof world.getAt(x, z) !== "undefined");
+
+		var object = {
+			id: "building"+i,
+			x: x,
+			z: z,
+			element: renderer.createObjectElement("block", "#c0c0c0")
+		};
+		container.appendChild(object.element);
+		world.add(object);
+	}
 
 	container.addEventListener("click", function(e) {
 		world.moveTo(player, renderer.toWorldCoordinatesX(e.offsetX), renderer.toWorldCoordinatesZ(e.offsetY));

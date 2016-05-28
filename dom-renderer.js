@@ -1,5 +1,6 @@
 module.exports = {
 	container: null,
+	assets: null,
 	viewUnitsPerWorldUnitX: null,
 	viewUnitsPerWorldUnitZ: null,
 	isIsometric: false,
@@ -8,12 +9,14 @@ module.exports = {
 	objectBoundsClass: "object-bounds",
 	objectClass: "object",
 
-	init: function(element, world) {
+	init: function(element, world, assets) {
 		this.viewUnitsPerWorldUnitX = element.offsetWidth / world.width;
 		this.viewUnitsPerWorldUnitZ = element.offsetHeight / world.depth;
 	
 		this.container = element;
 		this.container.classList.add(this.worldClass);
+
+		this.assets = assets;
 
 		this.injectStyles();
 
@@ -28,7 +31,7 @@ module.exports = {
 		var style = document.createElement("style");
 		style.innerText = `
 .${this.worldClass}, .${this.objectClass} {
-	transition: transform 2s, left 2s, bottom 2s;	/* Set transition times when moving into isomatric view */
+	transition: transform 2s, bottom 2s, right 2s, width 2s, height 2s;	/* Set transition times when moving into isomatric view */
 }
 .isometric {
 	transform: scaleY(0.5) rotateZ(45deg);
@@ -41,15 +44,18 @@ module.exports = {
 	position: absolute;
 	pointer-events: none;
 
-	transform: translateX(-50%);
-	left: 50%;
-	bottom: 0%;
-	transform: translateX(-50%);
+	right: 50%;
+	bottom: 50%;
+	transform: translate(50%, 50%);
+	width: 100%;
+	height: 100%;
 }
 .isometric .${this.objectClass} {
-	transform: translateX(-50%) rotateZ(-45deg) scaleY(2) translate(-50%, -25%);
-	left: 75%;
-	bottom: 25%;
+	transform: rotateZ(-45deg) scaleY(2);
+	right: 27.5%;
+    bottom: 30.5%;
+    width: 145%;
+	height: 145%;
 }
 `;
 		document.head.appendChild(style);
@@ -88,20 +94,19 @@ module.exports = {
 		}.bind(this));
 	},
 
-	createObjectElement: function(pic, colour) {
+	createObjectElement: function(key, colour) {
 		var el = this.createElement("div", {
 			"className": this.objectBoundsClass
 		}, {
-			//transition: "transform 1s",
 			width: this.viewUnitsPerWorldUnitX + "px",
 			height: this.viewUnitsPerWorldUnitZ + "px",
 			"background-color": colour
 		});
-		var img = this.createElement("img", {
-			src: pic,
-			"className": this.objectClass
-		}, null);
-		el.appendChild(img);
+		
+		var sprite = this.assets.new(key);
+		sprite.className = this.objectClass;
+
+		el.appendChild(sprite);
 
 		return el;
 	},
