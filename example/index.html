@@ -1,0 +1,65 @@
+<html>
+<head>
+	<title>Isometric 3D engine</title>
+	<script src="http://jtq.github.io/require/index.js"></script>
+	<style type="text/css">
+body {
+	padding-left: 120px;		/* Bump world along 40$ or so to account for extra width of diagonal when rotated */
+}
+.container {
+	width: 300px;
+	height: 300px;
+}
+	</style>
+</head>
+<body>
+
+	<div class="container"></div>
+
+	<script>
+
+var world, container, renderer;	// Convenience in debugging
+
+require(['../world.js', '../dom-renderer.js'], function(World, Renderer) {
+	container = document.querySelector(".container");
+	world = new World(10, 10);
+	renderer = Renderer;
+
+	renderer.init(container, world);
+
+	var player = {
+		id: "player",
+		x: 1,
+		z: 0,
+		element: renderer.createObjectElement("pin.png", "#0080ff")
+	};
+	container.appendChild(player.element);
+	world.add(player);
+
+	var object = {
+		id: "building",
+		x: 3,
+		z: 4,
+		element: renderer.createObjectElement("building.png", "#c0c0c0")
+	};
+	container.appendChild(object.element);
+	world.add(object);
+
+	container.addEventListener("click", function(e) {
+		world.moveTo(player, renderer.toWorldCoordinatesX(e.offsetX), renderer.toWorldCoordinatesZ(e.offsetY));
+	});
+
+	requestAnimationFrame(function step() {
+		world.step();
+		renderer.render(world);
+		requestAnimationFrame(step);
+	});
+
+	setTimeout(function() {
+		renderer.setIsometric(true);
+	}, 1000);
+	
+});
+	</script>
+</body>
+</html>
