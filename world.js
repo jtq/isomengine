@@ -17,6 +17,13 @@ function World(width, depth) {
 		this.objects[obj.id] = obj;
 	};
 
+	this.remove = function(obj) {
+		this.world[obj.x][obj.z] = undefined;
+		obj.x = null;
+		obj.z = null;
+		delete(this.objects[obj.id]);
+	};
+
 	this.getAt = function(x, z) {
 		return this.world[x][z];
 	};
