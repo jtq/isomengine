@@ -30,6 +30,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js'], function(W
 
 	var player = {
 		id: "player",
+		type: "player",
 		x: 1,
 		z: 0,
 		element: renderer.createObjectElement("player", "#0080ff")
@@ -47,6 +48,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js'], function(W
 
 		var object = {
 			id: "building"+i,
+			type: "block",
 			x: x,
 			z: z,
 			element: renderer.createObjectElement("block", "#c0c0c0")

@@ -21,6 +21,17 @@ function World(width, depth) {
 		return this.world[x][z];
 	};
 
+	this.getBy = function(attrib, value) {
+		var self = this;
+		return Object.keys(this.objects)
+			.map(function(id) {
+				return self.objects[id];
+			})
+			.filter(function(obj) {
+				return obj[attrib] === value;
+			});
+	};
+
 	this.moveTo = function(obj, x, z) {
 		this.world[obj.x][obj.z] = undefined;	// Unset old position
 		obj.x = x;
