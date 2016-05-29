@@ -1,0 +1,28 @@
+{
+  "name": "@jtq/isomengine",
+  "version": "1.0.0",
+  "description": "Isometric game engine with support for multiple renderers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jtq/isomengine.git"
+  },
+  "keywords": [
+    "jtq",
+    "isometric",
+    "game",
+    "engine"
+  ],
+  "author": "James Palmer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jtq/isomengine/issues"
+  },
+  "homepage": "https://github.com/jtq/isomengine#readme",
+  "dependencies": {
+    "@jtq/tween": "^1.0.0"
+  }
+}
