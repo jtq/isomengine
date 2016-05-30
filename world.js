@@ -7,25 +7,49 @@ function World(width, depth) {
 		this.world[x] = [];
 	}
 
+	this.outofBounds = function(x, z) {
+		return (x<0 || x>=this.width || z<0 || z>=this.depth);
+	};
+
+	this.validObject = function(obj) {
+		return !!(obj instanceof Object && obj.id);	// Object with an id
+	};
+
+	this.objectExists = function(obj) {
+		return this.validObject(obj) && this.objects[obj.id];
+	}
+
+	this.validNewObject = function(obj) {
+		return this.validObject(obj) && !this.objects[obj.id];	// Object with an id
+	};
+
 	this.add = function(obj, x, z) {
-		if(!(obj instanceof Object) || !obj.id) {
-			console.error("Objects must have an id", obj);
+		if(this.outofBounds(x,z) || !this.validNewObject(obj)) {
+			return false;
 		}
 		x = x || obj.x;
 		z = z || obj.z;
 		this.world[x][z] = obj;
 		this.objects[obj.id] = obj;
+		return true;
 	};
 
 	this.remove = function(obj) {
+		if(!this.objectExists(obj)) {
+			return false;
+		}
 		this.world[obj.x][obj.z] = undefined;
 		obj.x = null;
 		obj.z = null;
 		delete(this.objects[obj.id]);
+		return true;
 	};
 
 	this.getAt = function(x, z) {
-		return this.world[x][z];
+		if(this.outofBounds(x,z)) {
+			return undefined;
+		}
+		return this.world[x][z] || null;
 	};
 
 	this.getBy = function(attrib, value) {
@@ -40,10 +64,14 @@ function World(width, depth) {
 	};
 
 	this.moveTo = function(obj, x, z) {
-		this.world[obj.x][obj.z] = undefined;	// Unset old position
+		if(this.outofBounds(x,z) || !this.objectExists(obj)) {
+			return false;
+		}
+		delete(this.world[obj.x][obj.z]);	// Unset old position
 		obj.x = x;
 		obj.z = z;
 		this.world[x][z] = obj;
+		return true;
 	};
 
 	this.step = function() {
