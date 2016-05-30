@@ -20,6 +20,19 @@ body {
 
 var world, container, renderer, assets, pathfinder;	// Convenience in debugging
 
+function create(id, type, x, z, colour) {
+	var obj = {
+		id: id,
+		type: type,
+		x: x,
+		z: z,
+		element: renderer.createObjectElement(type, colour)
+	};
+	container.appendChild(obj.element);
+	world.add(obj);
+	return obj;
+}
+
 require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js'], function(World, Renderer, Assets, Pathfinder) {
 	container = document.querySelector(".container");
 	world = new World(10, 10);
@@ -29,15 +42,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 
 	renderer.init(container, world, assets);
 
-	var player = {
-		id: "player",
-		type: "player",
-		x: 1,
-		z: 0,
-		element: renderer.createObjectElement("player", "#0080ff")
-	};
-	container.appendChild(player.element);
-	world.add(player);
+	var player = create("player", "player", 1, 0, "#0080ff");
 
 	for(var i=0; i<10; i++) {
 		var x, z;
@@ -47,15 +52,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		}
 		while(typeof world.getAt(x, z) !== "undefined");
 
-		var object = {
-			id: "building"+i,
-			type: "block",
-			x: x,
-			z: z,
-			element: renderer.createObjectElement("block", "#c0c0c0")
-		};
-		container.appendChild(object.element);
-		world.add(object);
+		create("building"+i, "block", x, z, "#c0c0c0");
 	}
 
 	container.addEventListener("click", function(e) {
@@ -66,18 +63,10 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 			world.remove(obj);
 			container.removeChild(obj.element);
 		});
-		var route = pathfinder.find([player.x, player.z], [worldX, worldZ]);
+		var naiveRoute = pathfinder.find([player.x, player.z], [worldX, worldZ]);
 
-		route.forEach(function(step, i) {
-			var placeholder = {
-				id: "placeholder"+i,
-				type: "placeholder",
-				x: step.x,
-				z: step.y,
-				element: renderer.createObjectElement("placeholder", "transparent")
-			};
-			container.appendChild(placeholder.element);
-			world.add(placeholder);
+		naiveRoute.forEach(function(step, i) {
+			create("placeholder"+i, "placeholder", step.x, step.y, "transparent");
 		});
 
 		world.moveTo(player, worldX, worldZ);
