@@ -52,6 +52,23 @@ function World(width, depth) {
 		return this.world[x][z] || null;
 	};
 
+	this.passable = function(x, z, ignoreableTypes) {
+		if(!ignoreableTypes) { ignoreableTypes = []; }
+		if(!(ignoreableTypes instanceof Array)) { ignoreableTypes = [ignoreableTypes]; }	// Coerce ignorableTypes to an array
+
+		var obj = this.getAt(x, z);
+		
+		if(typeof obj === "undefined") {	// Out of bounds
+			return false;
+		}
+		else if(obj === null) {	// Empty space
+			return true;
+		}
+		return ignoreableTypes.some(function(ignorableType) {	// Is the object any ignorable type?
+			return obj.type === ignorableType;
+		});
+	};
+
 	this.getBy = function(attrib, value) {
 		var self = this;
 		return Object.keys(this.objects)
