@@ -8,7 +8,15 @@ function World(width, depth) {
 	}
 
 	this.outofBounds = function(x, z) {
+		if(x instanceof Object) {
+			z = x.z;
+			x = x.x;
+		}
 		return (x<0 || x>=this.width || z<0 || z>=this.depth);
+	};
+
+	this.inBounds = function(x, z) {
+		return !this.outOfBounds(x, z);
 	};
 
 	this.validObject = function(obj) {
@@ -53,11 +61,16 @@ function World(width, depth) {
 	};
 
 	this.passable = function(x, z, ignoreableTypes) {
+		if(x instanceof Object) {
+			ignoreableTypes = z;
+			z = x.z;
+			x = x.x;
+		}
 		if(!ignoreableTypes) { ignoreableTypes = []; }
 		if(!(ignoreableTypes instanceof Array)) { ignoreableTypes = [ignoreableTypes]; }	// Coerce ignorableTypes to an array
 
 		var obj = this.getAt(x, z);
-		
+
 		if(typeof obj === "undefined") {	// Out of bounds
 			return false;
 		}

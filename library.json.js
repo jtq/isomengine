@@ -9,9 +9,14 @@ module.exports = {
 		"depth": 1,
 		"sprite": "block.png"
 	},
-	"placeholder": {
+	"route": {
 		"width": 1,
 		"depth": 1,
-		"sprite": "placeholder.png"
+		"sprite": "route.png"
+	},
+	"clearroute": {
+		"width": 1,
+		"depth": 1,
+		"sprite": "clearroute.png"
 	}
 };
