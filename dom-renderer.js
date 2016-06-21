@@ -21,9 +21,9 @@ module.exports = {
 		this.injectStyles();
 
 		this.styleElement(this.container, {
-			backgroundColor: "#308000",
-			"pointer-events": "auto"
+			backgroundColor: "#308000"
 		});
+		this.container.classList.add("interactable");
 
 		this.setIsometric(this.isIsometric);
 	},
@@ -56,6 +56,9 @@ module.exports = {
     bottom: 30.5%;
     width: 145%;
 	height: 145%;
+}
+.${this.objectClass}.interactable {
+	pointer-events: auto;
 }
 `;
 		document.head.appendChild(style);
@@ -94,7 +97,7 @@ module.exports = {
 		}.bind(this));
 	},
 
-	createObjectElement: function(key, colour) {
+	createObjectElement: function(key, colour, obj, eventHandlers) {
 		var el = this.createElement("div", {
 			"className": this.objectBoundsClass
 		}, {
@@ -104,9 +107,17 @@ module.exports = {
 		});
 		
 		var sprite = this.assets.new(key);
-		sprite.className = this.objectClass;
+		sprite.className = this.objectClass + (eventHandlers ? " interactable" : "");
 
 		el.appendChild(sprite);
+
+		if(eventHandlers) {
+			Object.keys(eventHandlers).forEach(function(event) {
+				sprite.addEventListener(event, function(e) {
+					eventHandlers[event].call(obj, e);
+				});
+			});
+		}
 
 		return el;
 	},
