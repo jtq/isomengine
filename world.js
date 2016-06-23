@@ -105,7 +105,14 @@ function World(width, depth) {
 	};
 
 	this.step = function() {
-
+		var objects = Object.keys(this.objects).map(function(id) { return this.objects[id]; }.bind(this));
+		var nextStep;
+		objects.forEach(function(obj) {
+			if(obj.route.length) {
+				nextStep = obj.route.shift();
+				this.moveTo(obj, nextStep.x, nextStep.z);
+			}
+		}.bind(this));
 	};
 }
 

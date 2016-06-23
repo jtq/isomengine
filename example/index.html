@@ -28,6 +28,7 @@ function create(id, type, x, z, colour, eventHandlers) {
 		z: z,
 		interactable: !!eventHandlers,
 		eventHandlers: eventHandlers,
+		route: []
 	};
 	obj.element = renderer.createObjectElement(type, colour, obj, eventHandlers);
 
@@ -82,35 +83,45 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		var worldX = renderer.toWorldCoordinatesX(e.offsetX);
 		var worldZ = renderer.toWorldCoordinatesZ(e.offsetY);
 
-		world.getBy("type", "route").forEach(function(obj) {
+		/*world.getBy("type", "route").forEach(function(obj) {
 			world.remove(obj);
 			container.removeChild(obj.element);
 		});
+		var naiveRoute = pathfinder.findDirect([player.x, player.z], [worldX, worldZ]);
+		naiveRoute.forEach(function(step, i) {
+			create("route"+i, "route", step.x, step.z, "transparent");
+		});*/
+
+
 		world.getBy("type", "clearroute").forEach(function(obj) {
 			world.remove(obj);
 			container.removeChild(obj.element);
 		});
-
-		//var naiveRoute = pathfinder.findDirect([player.x, player.z], [worldX, worldZ]);
 		var clearRoute = pathfinder.findClear([player.x, player.z], [worldX, worldZ], ["player"]);
-
-		/*naiveRoute.forEach(function(step, i) {
-			create("route"+i, "route", step.x, step.z, "transparent");
-		});*/
 		if(clearRoute === null) {
 			console.error("No route from "+player.x+","+player.z+" to "+worldX+","+worldZ);
 		}
 		else{
-			world.moveTo(player, worldX, worldZ);
+			clearRoute.shift();	// Pop the starting position off the array, because we're only interested in where we need to move *to* from here.
+			player.route = clearRoute;
+			//world.moveTo(player, worldX, worldZ);
 			clearRoute.forEach(function(step, i) {
 				create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
 			});
 		}
 	});
 
+	var frame = 0;
+
+	renderer.render(world);
+
 	requestAnimationFrame(function step() {
-		world.step();
-		renderer.render(world);
+		frame++;
+
+		if(frame % 10 === 0) {
+			world.step();
+			renderer.render(world);
+		}
 		requestAnimationFrame(step);
 	});
 
