@@ -9,3 +9,7 @@ Click on the board (green spaces) to move the player object around.  Click on ob
 ## Motivation
 
 Attempting to build a simple isometric game-engine using DOM elements (for simplicity, accessibility and usability) and CSS transforms (for hardware acceleration).
+
+## Live Demo
+
+http://jtq.github.io/isomengine/example/
