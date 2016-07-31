@@ -4,6 +4,8 @@ module.exports = {
 	viewUnitsPerWorldUnitX: null,
 	viewUnitsPerWorldUnitZ: null,
 	isIsometric: false,
+	animationDuration: 2,
+	interactionEnabled: false,
 
 	worldClass: "world",
 	objectBoundsClass: "object-bounds",
@@ -31,7 +33,10 @@ module.exports = {
 		var style = document.createElement("style");
 		style.innerText = `
 .${this.worldClass}, .${this.objectClass} {
-	transition: transform 2s, bottom 2s, right 2s, width 2s, height 2s;	/* Set transition times when moving into isomatric view */
+	transition: transform 0s, bottom 0s, right 0s, width 0s, height 0s;
+}
+.animating {
+	transition-duration: ${this.animationDuration}s;
 }
 .isometric {
 	transform: scaleY(0.5) rotateZ(45deg);
@@ -40,6 +45,7 @@ module.exports = {
 	position: absolute;
 	pointer-events: none;
 }
+
 .${this.objectClass} {
 	position: absolute;
 	pointer-events: none;
@@ -50,6 +56,13 @@ module.exports = {
 	width: 100%;
 	height: 100%;
 }
+.${this.objectClass}.interactable {
+	pointer-events: auto;
+}
+.${this.objectClass}.interactable:hover {
+	transform: translate(50%, 50%) scale(1.25);
+}
+
 .isometric .${this.objectClass} {
 	transform: rotateZ(-45deg) scaleY(2);
 	right: 27.5%;
@@ -57,15 +70,47 @@ module.exports = {
     width: 145%;
 	height: 145%;
 }
-.${this.objectClass}.interactable {
-	pointer-events: auto;
+.isometric .${this.objectClass}.interactable:hover {
+	transform: rotateZ(-45deg) scaleY(2) scale(1.25);
 }
 `;
 		document.head.appendChild(style);
 	},
 
+	beginAnimation: function() {
+		this.interactionEnabled = false;
+		this.container.classList.add("animating");
+		this.container.querySelectorAll("."+this.worldClass+", ."+this.objectClass).forEach(function(el) {
+			el.classList.add("animating");
+		});
+
+		var transitionEndHandler = function(e) {
+			if(e.target === this.container) {
+				this.endAnimation();
+			}
+		}.bind(this);
+
+		this.container.removeEventListener("webkitTransitionEnd", transitionEndHandler);
+		this.container.removeEventListener("transitionEnd", transitionEndHandler);
+
+		this.container.addEventListener("webkitTransitionEnd", transitionEndHandler);
+		this.container.addEventListener("transitionEnd", transitionEndHandler);
+	},
+
+	endAnimation: function() {
+		this.interactionEnabled = true;
+		this.container.classList.remove("animating");
+		this.container.querySelectorAll("."+this.worldClass+", ."+this.objectClass).forEach(function(el) {
+			el.classList.remove("animating");
+		});
+	},
+
 	setIsometric: function(isometric) {
 		this.isIsometric = (typeof isometric === "undefined") ? true : !!isometric;
+
+		if(this.animationDuration > 0) {
+			this.beginAnimation();
+		}
 
 		if(this.isIsometric) {
 			this.container.classList.add("isometric");

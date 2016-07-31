@@ -59,17 +59,13 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 
 		var building = create("building"+i, "block", x, z, "#c0c0c0", {
 			"click": function(e) {
-				e.stopPropagation();
-				console.log("Clicked", this);
+				if(renderer.interactionEnabled) {
+					e.stopPropagation();
+					alert("Clicked " + this.type + " " + this.id + "@[" + this.x + "," + this.z + "]");
+				}
 			},
-			"mouseover": function(e) {
-				this.element.firstChild.style.transitionDuration = "0s";
-				this.element.firstChild.style.transform = window.getComputedStyle(this.element.firstChild, null).getPropertyValue("transform") + " scale(1.25)";
-			},
-			"mouseout": function(e) {
-				this.element.firstChild.style.transitionDuration = "0s";
-				this.element.firstChild.style.transform = window.getComputedStyle(this.element.firstChild, null).getPropertyValue("transform") + " scale(0.8)";
-			}
+			/*"mouseover": function(e) {},
+			"mouseout": function(e) {}*/
 		});
 	}
 

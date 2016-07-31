@@ -2,11 +2,8 @@ function World(width, depth) {
 	this.width = width;
 	this.depth = depth;
 	this.objects = {};
-	this.world = [];
-	for(let x = 0; x < width; x++) {
-		this.world[x] = [];
-	}
-
+	this.world = {};
+	
 	this.outofBounds = function(x, z) {
 		if(x instanceof Object) {
 			z = x.z;
@@ -37,7 +34,7 @@ function World(width, depth) {
 		}
 		x = x || obj.x;
 		z = z || obj.z;
-		this.world[x][z] = obj;
+		this.world[x+","+z] = obj;
 		this.objects[obj.id] = obj;
 		return true;
 	};
@@ -46,7 +43,7 @@ function World(width, depth) {
 		if(!this.objectExists(obj)) {
 			return false;
 		}
-		this.world[obj.x][obj.z] = undefined;
+		delete this.world[obj.x+","+obj.z];
 		obj.x = null;
 		obj.z = null;
 		delete(this.objects[obj.id]);
@@ -57,7 +54,7 @@ function World(width, depth) {
 		if(this.outofBounds(x,z)) {
 			return undefined;
 		}
-		return this.world[x][z] || null;
+		return this.world[x+","+z] || null;
 	};
 
 	this.passable = function(x, z, ignoreableTypes) {
@@ -97,10 +94,10 @@ function World(width, depth) {
 		if(this.outofBounds(x,z) || !this.objectExists(obj)) {
 			return false;
 		}
-		delete(this.world[obj.x][obj.z]);	// Unset old position
+		delete(this.world[obj.x+","+obj.z]);	// Unset old position
 		obj.x = x;
 		obj.z = z;
-		this.world[x][z] = obj;
+		this.world[x+","+z] = obj;
 		return true;
 	};
 
