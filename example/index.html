@@ -104,6 +104,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 			clearRoute.forEach(function(step, i) {
 				create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
 			});
+			renderer.render(world);	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
 		}
 	});
 
