@@ -1,4 +1,5 @@
 var tween = require('@jtq/tween');
+var World = require('./world.js');
 
 function Pathfinder(world, adjacency_rule) {
 	this.world = world;
@@ -37,10 +38,15 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 
 	var self = this;
 
-	var steps = [{ x:to.x, z:to.z, d:0 }];
+	var board = new World(this.world.width, this.world.depth);
 
-	for(let i=0; i<steps.length; i++) {
-		var current = steps[i];
+
+	var firstItem = { x:to.x, z:to.z, d:0 };
+	var steps = [firstItem];
+	board.add(firstItem, firstItem.x, firstItem.z);
+
+	while(steps.length > 0) {
+		var current = steps.shift();
 		var adjacent = this.getAdjacents(current).filter(function(square) {
 			return self.world.passable(square, ignoreableTypes);
 		});
@@ -50,48 +56,42 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 
 		for(let a=0; a<adjacent.length; a++) {
 			var adj = adjacent[a];
-			for(let s=0; s<steps.length; s++) {
-				var step = steps[s];
-				if(adj.x === step.x && adj.z === step.z) {
-					if(step.d <= adj.d) {
-						adjacent.splice(a, 1);
-						a--;
-					}
-					else {
-						steps.splice(s, 1);
-						s--;
-					}
+
+			var existing = board.getAt(adj.x, adj.z);
+
+			if(existing && existing.d <= adj.d) {
+				adjacent.splice(a, 1);
+				a--;
+			}
+			else {
+				if(existing) {
+					board.remove(existing);
 				}
-			}	
+				board.add(adj, adj.x, adj.z);
+			}
 		}
 
 		steps = steps.concat(adjacent);
-		if(adjacent.some(function(adj) { return adj.x === from.x && adj.z === from.z; })) {
+		if(board.getAt(from.x, from.z)) {
 			break;
 		}
 	}
-
-	//console.log("steps", steps);
-
-	var board = [];	// Create empty board the size of the world
-	for(let x = 0; x < this.world.width; x++) {
-		board[x] = [];
-	}
-	steps.forEach(function(step) {
-		board[step.x][step.z] = step.d;
-	});
 
 	//console.log(board);
 
 	var loop = from;
 	var route = [from];
 	while(loop && (loop.x !== to.x || loop.z !== to.z)) {
-		var weight = board[loop.x][loop.z];
-		var passableAdjacents = this.getRandomisedAdjacents(loop).filter(function(square) {
-			return self.world.passable(square, ignoreableTypes);
-		});
+		var weight = board.getAt(loop.x, loop.z).d;
+		var passableAdjacents = this.getRandomisedAdjacents(loop)
+			.filter(function(square) {
+				return self.world.passable(square, ignoreableTypes) && board.getAt(square.x, square.z);
+			})
+			.map(function(square) {
+				return board.getAt(square.x, square.z);
+			});
 		loop = passableAdjacents.find(function(adj) {
-			return board[adj.x][adj.z] === weight - 1;
+			return adj.d === weight - 1;
 		});
 		route.push(loop);
 	}

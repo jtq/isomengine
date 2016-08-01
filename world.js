@@ -22,13 +22,16 @@ function World(width, depth) {
 
 	this.objectExists = function(obj) {
 		return this.validObject(obj) && this.objects[obj.id];
-	}
+	};
 
 	this.validNewObject = function(obj) {
 		return this.validObject(obj) && !this.objects[obj.id];	// Object with an id
 	};
 
 	this.add = function(obj, x, z) {
+
+		obj.id = obj.id || Math.floor(Math.random()*Number.MAX_SAFE_INTEGER);
+
 		if(this.outofBounds(x,z) || !this.validNewObject(obj)) {
 			return false;
 		}
