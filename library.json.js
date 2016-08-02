@@ -4,10 +4,15 @@ module.exports = {
 		"depth": 1,
 		"sprite": "player.png"
 	},
-	"block": {
+	"wall": {
 		"width": 1,
 		"depth": 1,
-		"sprite": "block.png"
+		"sprite": "wall.png"
+	},
+	"chest": {
+		"width": 1,
+		"depth": 1,
+		"sprite": "chest.png"
 	},
 	"route": {
 		"width": 1,
