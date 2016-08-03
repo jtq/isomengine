@@ -23,7 +23,7 @@ body {
 
 	<script>
 
-var world, container, renderer, assets, pathfinder;	// Convenience in debugging
+var world, container, renderer, assets, pathfinder, player;	// Convenience in debugging
 
 function create(id, type, x, z, colour, eventHandlers) {
 	var obj = {
@@ -43,6 +43,26 @@ function create(id, type, x, z, colour, eventHandlers) {
 	return obj;
 }
 
+function setPathTo(objectToSet, worldX, worldZ) {
+	world.getBy("type", "clearroute").forEach(function(obj) {
+		world.remove(obj);
+		container.removeChild(obj.element);
+	});
+	var clearRoute = pathfinder.findClear([objectToSet.x, objectToSet.z], [worldX, worldZ], ["player"]);
+	if(clearRoute === null) {
+		console.error("No route from "+objectToSet.x+","+objectToSet.z+" to "+worldX+","+worldZ);
+	}
+	else{
+		clearRoute.shift();	// Pop the starting position off the array, because we're only interested in where we need to move *to* from here.
+		objectToSet.route = clearRoute;
+		//world.moveTo(player, worldX, worldZ);
+		clearRoute.forEach(function(step, i) {
+			create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
+		});
+		renderer.render(world);	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
+	}
+}
+
 require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js'], function(World, Renderer, Assets, Pathfinder) {
 	container = document.querySelector(".container");
 	world = new World(20, 20);
@@ -52,9 +72,9 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 
 	renderer.init(container, world, assets);
 
-	var player = create("player", "player", 1, 0, "#0080ff");
+	player = create("player", "player", 1, 0, "#0080ff");
 
-	for(var i=0; i<50; i++) {
+	for(var i=0; i<9; i++) {
 		var x, z;
 		do {
 			x = Math.floor(Math.random()*100);
@@ -62,11 +82,16 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		}
 		while(world.getAt(x, z) !== null);
 
-		var building = create("building"+i, "block", x, z, "#c0c0c0", {
+		var chest = create("chest"+i, "chest", x, z, "#308000", {
 			"click": function(e) {
 				if(renderer.interactionEnabled) {
-					e.stopPropagation();
-					alert("Clicked " + this.type + " " + this.id + "@[" + this.x + "," + this.z + "]");
+					if(Math.abs(player.x - this.x) + Math.abs(player.z - this.z) === 1 ) {
+						e.stopPropagation();
+						alert("Clicked " + this.type + " " + this.id + "@[" + this.x + "," + this.z + "]");
+					}
+					else {
+						setPathTo(player, this.x, this.z);
+					}
 				}
 			},
 			/*"mouseover": function(e) {},
@@ -74,13 +99,22 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		});
 	}
 
-	/*create("building0", "block", 4, 4, "#c0c0c0");
-	create("building1", "block", 3, 4, "#c0c0c0");
-	create("building2", "block", 5, 4, "#c0c0c0");
-	create("building3", "block", 4, 3, "#c0c0c0");
-	create("building4", "block", 4, 5, "#c0c0c0");*/
+	for(var i=0; i<41; i++) {
+		var x, z;
+		do {
+			x = Math.floor(Math.random()*100);
+			z = Math.floor(Math.random()*100);
+		}
+		while(world.getAt(x, z) !== null);
+
+		var building = create("wall"+i, "wall", x, z, "#808080");
+	}
 
 	container.addEventListener("click", function(e) {
+		if(e.target !== container) {
+			return;
+		}
+
 		var worldX = renderer.toWorldCoordinatesX(e.offsetX);
 		var worldZ = renderer.toWorldCoordinatesZ(e.offsetY);
 
@@ -93,24 +127,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 			create("route"+i, "route", step.x, step.z, "transparent");
 		});*/
 
-
-		world.getBy("type", "clearroute").forEach(function(obj) {
-			world.remove(obj);
-			container.removeChild(obj.element);
-		});
-		var clearRoute = pathfinder.findClear([player.x, player.z], [worldX, worldZ], ["player"]);
-		if(clearRoute === null) {
-			console.error("No route from "+player.x+","+player.z+" to "+worldX+","+worldZ);
-		}
-		else{
-			clearRoute.shift();	// Pop the starting position off the array, because we're only interested in where we need to move *to* from here.
-			player.route = clearRoute;
-			//world.moveTo(player, worldX, worldZ);
-			clearRoute.forEach(function(step, i) {
-				create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
-			});
-			renderer.render(world);	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
-		}
+		setPathTo(player, worldX, worldZ);
 	});
 
 	var frame = 0;

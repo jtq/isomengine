@@ -48,7 +48,7 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 	while(steps.length > 0) {
 		var current = steps.shift();
 		var adjacent = this.getAdjacents(current).filter(function(square) {
-			return self.world.passable(square, ignoreableTypes);
+			return self.world.passable(square, ignoreableTypes) || self.world.manhattanDistance(square, to) === 0;
 		});
 		adjacent.forEach(function(square) {
 			square.d = current.d + 1;
@@ -85,7 +85,7 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 		var weight = board.getAt(loop.x, loop.z).d;
 		var passableAdjacents = this.getRandomisedAdjacents(loop)
 			.filter(function(square) {
-				return self.world.passable(square, ignoreableTypes) && board.getAt(square.x, square.z);
+				return board.getAt(square.x, square.z) && (self.world.passable(square, ignoreableTypes) || self.world.manhattanDistance(square, to) === 0);
 			})
 			.map(function(square) {
 				return board.getAt(square.x, square.z);
@@ -98,6 +98,10 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 
 	if(!loop) {	// Ran out of viable adjacents/couldn't find a route from->to (eg, because it's impassable)
 		route = null;
+	}
+
+	if(!self.world.passable(to, ignoreableTypes)) {
+		route.pop();
 	}
 
 	return route;
