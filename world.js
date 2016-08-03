@@ -104,6 +104,10 @@ function World(width, depth) {
 		return true;
 	};
 
+	this.manhattanDistance = function(obj1, obj2) {
+		return Math.abs(obj1.x - obj2.x) + Math.abs(obj1.z - obj2.z);
+	}
+
 	this.step = function() {
 		var objects = Object.keys(this.objects).map(function(id) { return this.objects[id]; }.bind(this));
 		var nextStep;
