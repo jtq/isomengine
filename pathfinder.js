@@ -77,7 +77,11 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 		}
 	}
 
-	//console.log(board);
+	
+	// Ran out of next steps before we connected destination to source (in other words, destination unreachable from source)
+	if(!board.getAt(from.x, from.z)) {
+		return null;
+	}
 
 	var loop = from;
 	var route = [from];
@@ -94,10 +98,6 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 			return adj.d === weight - 1;
 		});
 		route.push(loop);
-	}
-
-	if(!loop) {	// Ran out of viable adjacents/couldn't find a route from->to (eg, because it's impassable)
-		route = null;
 	}
 
 	if(!self.world.passable(to, ignoreableTypes)) {
