@@ -143,6 +143,7 @@ module.exports = {
 	},
 
 	createObjectElement: function(key, colour, obj, eventHandlers) {
+
 		var el = this.createElement("div", {
 			"className": this.objectBoundsClass
 		}, {
@@ -152,7 +153,7 @@ module.exports = {
 		});
 		
 		var sprite = this.assets.new(key);
-		sprite.className = this.objectClass + (eventHandlers ? " interactable" : "");
+		sprite.className = this.objectClass + (obj.is("interactable") ? " interactable" : "");
 
 		el.appendChild(sprite);
 
