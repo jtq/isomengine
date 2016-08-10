@@ -24,18 +24,20 @@ body {
 	<script>
 
 var world, container, renderer, assets, pathfinder, player;	// Convenience in debugging
+var WorldObject, Chest;
 
-function create(id, type, x, z, colour, eventHandlers) {
-	var obj = {
-		id: id,
-		type: type,
-		x: x,
-		z: z,
-		interactable: !!eventHandlers,
-		eventHandlers: eventHandlers,
-		route: []
-	};
-	obj.element = renderer.createObjectElement(type, colour, obj, eventHandlers);
+function create(id, Type, x, z, colour, eventHandlers) {
+	var obj, stringName;
+	if(Type instanceof Function) {
+		obj = new Type(x, z, eventHandlers, id);
+		stringName = Type.prototype.constructor.name.toLowerCase();
+	}
+	else {
+		stringName = Type;
+		obj = new WorldObject(stringName, x, z, eventHandlers, id);
+	}
+	
+	obj.element = renderer.createObjectElement(stringName, colour, obj, eventHandlers);
 
 	container.appendChild(obj.element);
 	world.add(obj);
@@ -63,12 +65,15 @@ function setPathTo(objectToSet, worldX, worldZ) {
 	}
 }
 
-require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js'], function(World, Renderer, Assets, Pathfinder) {
+require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js', '../world-object.js', '../chest.js'], function(World, Renderer, Assets, Pathfinder, worldObjectClass, chestClass) {
 	container = document.querySelector(".container");
 	world = new World(20, 20);
 	renderer = Renderer;
 	assets = Assets;
 	pathfinder = new Pathfinder(world, Pathfinder.prototype.COMPASS_DIRECTIONS);
+
+	WorldObject = worldObjectClass;
+	Chest = chestClass;
 
 	renderer.init(container, world, assets);
 
@@ -82,7 +87,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		}
 		while(world.getAt(x, z) !== null);
 
-		var chest = create("chest"+i, "chest", x, z, "#308000", {
+		var chest = create("chest"+i, Chest, x, z, "#308000", {
 			"click": function(e) {
 				if(renderer.interactionEnabled) {
 					if(Math.abs(player.x - this.x) + Math.abs(player.z - this.z) === 1 ) {
@@ -94,8 +99,8 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 					}
 				}
 			},
-			/*"mouseover": function(e) {},
-			"mouseout": function(e) {}*/
+			//"mouseover": function(e) {},
+			//"mouseout": function(e) {}
 		});
 	}
 
