@@ -19,12 +19,17 @@ body {
 	<div class="controls">
 		<button onclick="renderer.setIsometric(true);">Isometric</button>
 		<button onclick="renderer.setIsometric(false);">Flat</button>
+
+		<button onclick="pause();">Pause</button>
+		<button onclick="play();">Play</button>
 	</div>
 
 	<script>
 
 var world, container, renderer, assets, pathfinder, player;	// Convenience in debugging
 var WorldObject, Chest, Player;
+
+var running = true;
 
 function create(id, Type, x, z, colour, eventHandlers) {
 	var obj, stringName;
@@ -62,6 +67,14 @@ function setPathTo(objectToSet, worldX, worldZ) {
 	else {
 		console.error("No route for "+objectToSet.type+" "+objectToSet.id+" from "+objectToSet.x+","+objectToSet.z+" to "+worldX+","+worldZ);
 	}
+}
+
+function pause() {
+	running = false;
+}
+
+function play() {
+	running = true;
 }
 
 require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js', '../world-object.js', '../chest.js', '../player.js'], function(World, Renderer, Assets, Pathfinder, worldObjectClass, chestClass, playerClass) {
@@ -140,11 +153,14 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 	renderer.render(world);
 
 	requestAnimationFrame(function step() {
-		frame++;
 
-		if(frame % 10 === 0) {
-			world.step();
-			renderer.render(world);
+		if(running) {
+			frame++;
+
+			if(frame % 10 === 0) {
+				world.step();
+				renderer.render(world);
+			}
 		}
 		requestAnimationFrame(step);
 	});
