@@ -12,7 +12,8 @@ function WorldObject(type, x, z, eventHandlers, id) {
 
 WorldObject.prototype.is = function(role) {
 	return !!this.roles[role];
-}
+};
+
 WorldObject.prototype.set = function(roles) {
 	if(!(roles instanceof Array)) {
 		roles = [roles];
@@ -21,7 +22,6 @@ WorldObject.prototype.set = function(roles) {
 	roles.forEach(function(role) {
 		this.roles[role] = true;
 	}.bind(this));
-}
-
+};
 
 module.exports = WorldObject;

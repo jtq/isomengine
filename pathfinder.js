@@ -1,5 +1,4 @@
 var tween = require('@jtq/tween');
-var World = require('./world.js');
 
 function Pathfinder(world, adjacency_rule) {
 	this.world = world;
@@ -38,15 +37,10 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 
 	var self = this;
 
-	var board = new World(this.world.width, this.world.depth);
+	var steps = [{ x:to.x, z:to.z, d:0 }];
 
-
-	var firstItem = { x:to.x, z:to.z, d:0 };
-	var steps = [firstItem];
-	board.add(firstItem, firstItem.x, firstItem.z);
-
-	while(steps.length > 0) {
-		var current = steps.shift();
+	for(let i=0; i<steps.length; i++) {
+		var current = steps[i];
 		var adjacent = this.getAdjacents(current).filter(function(square) {
 			return self.world.passable(square, ignoreableTypes) || self.world.manhattanDistance(square, to) === 0;
 		});
@@ -56,46 +50,50 @@ Pathfinder.prototype.findClear = function(from, to, ignoreableTypes) {
 
 		for(let a=0; a<adjacent.length; a++) {
 			var adj = adjacent[a];
-
-			var existing = board.getAt(adj.x, adj.z);
-
-			if(existing && existing.d <= adj.d) {
-				adjacent.splice(a, 1);
-				a--;
-			}
-			else {
-				if(existing) {
-					board.remove(existing);
+			for(let s=0; s<steps.length; s++) {
+				var step = steps[s];
+				if(adj.x === step.x && adj.z === step.z) {
+					if(step.d <= adj.d) {
+						adjacent.splice(a, 1);
+						a--;
+					}
+					else {
+						steps.splice(s, 1);
+						s--;
+					}
 				}
-				board.add(adj, adj.x, adj.z);
-			}
+			}	
 		}
 
 		steps = steps.concat(adjacent);
-		if(board.getAt(from.x, from.z)) {
+		if(adjacent.some(function(adj) { return adj.x === from.x && adj.z === from.z; })) {
 			break;
 		}
 	}
 
+	var board = [];	// Create empty board the size of the world
+	for(let x = 0; x < this.world.width; x++) {
+		board[x] = [];
+	}
+	steps.forEach(function(step) {
+		board[step.x][step.z] = step.d;
+	});
 	
 	// Ran out of next steps before we connected destination to source (in other words, destination unreachable from source)
-	if(!board.getAt(from.x, from.z)) {
+	if(!board[from.x][from.z]) {
 		return null;
 	}
 
 	var loop = from;
 	var route = [from];
 	while(loop && (loop.x !== to.x || loop.z !== to.z)) {
-		var weight = board.getAt(loop.x, loop.z).d;
-		var passableAdjacents = this.getRandomisedAdjacents(loop)
-			.filter(function(square) {
-				return board.getAt(square.x, square.z) && (self.world.passable(square, ignoreableTypes) || self.world.manhattanDistance(square, to) === 0);
-			})
-			.map(function(square) {
-				return board.getAt(square.x, square.z);
-			});
+		var weight = board[loop.x][loop.z];
+		var passableAdjacents = this.getRandomisedAdjacents(loop).filter(function(square) {
+			return self.world.passable(square, ignoreableTypes);
+		});
+
 		loop = passableAdjacents.find(function(adj) {
-			return adj.d === weight - 1;
+			return board[adj.x][adj.z] === weight - 1;
 		});
 		route.push(loop);
 	}

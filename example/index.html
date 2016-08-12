@@ -24,7 +24,7 @@ body {
 	<script>
 
 var world, container, renderer, assets, pathfinder, player;	// Convenience in debugging
-var WorldObject, Chest;
+var WorldObject, Chest, Player;
 
 function create(id, Type, x, z, colour, eventHandlers) {
 	var obj, stringName;
@@ -65,7 +65,7 @@ function setPathTo(objectToSet, worldX, worldZ) {
 	}
 }
 
-require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js', '../world-object.js', '../chest.js'], function(World, Renderer, Assets, Pathfinder, worldObjectClass, chestClass) {
+require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js', '../world-object.js', '../chest.js', '../player.js'], function(World, Renderer, Assets, Pathfinder, worldObjectClass, chestClass, playerClass) {
 	container = document.querySelector(".container");
 	world = new World(20, 20);
 	renderer = Renderer;
@@ -74,10 +74,11 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 
 	WorldObject = worldObjectClass;
 	Chest = chestClass;
+	Player = playerClass;
 
 	renderer.init(container, world, assets);
 
-	player = create("player", "player", 1, 0, "#0080ff");
+	player = create("player", Player, 1, 0, "#0080ff");
 
 	for(var i=0; i<9; i++) {
 		var x, z;
