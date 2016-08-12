@@ -137,8 +137,8 @@ module.exports = {
 		var obj;
 		Object.keys(world.objects).forEach(function(id) {
 			obj = world.objects[id];
-			obj.element.style.zIndex = (obj.z * world.width) + obj.x;
-			obj.element.style.transform = "translate(" + this.toViewCoordinatesX(obj.x) + "px, " + this.toViewCoordinatesZ(obj.z) + "px)";
+			obj.rendererObject.style.zIndex = (obj.z * world.width) + obj.x;
+			obj.rendererObject.style.transform = "translate(" + this.toViewCoordinatesX(obj.x) + "px, " + this.toViewCoordinatesZ(obj.z) + "px)";
 		}.bind(this));
 	},
 

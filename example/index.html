@@ -37,9 +37,9 @@ function create(id, Type, x, z, colour, eventHandlers) {
 		obj = new WorldObject(stringName, x, z, eventHandlers, id);
 	}
 	
-	obj.element = renderer.createObjectElement(stringName, colour, obj, eventHandlers);
+	obj.setRendererObject(renderer.createObjectElement(stringName, colour, obj, eventHandlers));
 
-	container.appendChild(obj.element);
+	container.appendChild(obj.rendererObject);
 	world.add(obj);
 
 	return obj;
@@ -48,12 +48,12 @@ function create(id, Type, x, z, colour, eventHandlers) {
 function setPathTo(objectToSet, worldX, worldZ) {
 	world.getBy("type", "clearroute").forEach(function(obj) {
 		world.remove(obj);
-		container.removeChild(obj.element);
+		container.removeChild(obj.rendererObject);
 	});
 	var clearRoute = world.getPathTo(objectToSet, worldX, worldZ, objectToSet.type);
 	if(clearRoute) {
 		objectToSet.setRoute(clearRoute);
-		
+
 		clearRoute.forEach(function(step, i) {
 			create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
 		});
@@ -125,7 +125,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 
 		/*world.getBy("type", "route").forEach(function(obj) {
 			world.remove(obj);
-			container.removeChild(obj.element);
+			container.removeChild(obj.rendererObject);
 		});
 		var naiveRoute = pathfinder.findDirect([player.x, player.z], [worldX, worldZ]);
 		naiveRoute.forEach(function(step, i) {

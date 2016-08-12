@@ -10,6 +10,10 @@ function WorldObject(type, x, z, eventHandlers, id) {
 	this.roles = {};
 }
 
+WorldObject.prototype.setRendererObject = function(obj) {
+	this.rendererObject = obj;
+};
+
 WorldObject.prototype.is = function(role) {
 	return !!this.roles[role];
 };
