@@ -1,8 +1,12 @@
+var Pathfinder = require('./pathfinder');
+
 function World(width, depth) {
 	this.width = width;
 	this.depth = depth;
 	this.objects = {};
 	this.world = {};
+
+	this.pathfinder = new Pathfinder(this, Pathfinder.prototype.COMPASS_DIRECTIONS);
 	
 	this.outofBounds = function(x, z) {
 		if(x instanceof Object) {
@@ -106,7 +110,17 @@ function World(width, depth) {
 
 	this.manhattanDistance = function(obj1, obj2) {
 		return Math.abs(obj1.x - obj2.x) + Math.abs(obj1.z - obj2.z);
-	}
+	};
+
+	this.getPathTo = function(fromObject, x, z, ignoreTypes) {
+		ignoreTypes = ignoreTypes || [fromObject.type];
+
+		var clearRoute = this.pathfinder.findClear(fromObject, [x, z], ignoreTypes);
+		if(clearRoute !== null) {
+			clearRoute.shift();	// Pop the starting position off the array, because we're only interested in where we need to move *to* from here.
+		}
+		return clearRoute;
+	};
 
 	this.step = function() {
 		var objects = Object.keys(this.objects).map(function(id) { return this.objects[id]; }.bind(this));

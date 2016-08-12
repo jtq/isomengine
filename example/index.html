@@ -50,18 +50,17 @@ function setPathTo(objectToSet, worldX, worldZ) {
 		world.remove(obj);
 		container.removeChild(obj.element);
 	});
-	var clearRoute = pathfinder.findClear([objectToSet.x, objectToSet.z], [worldX, worldZ], ["player"]);
-	if(clearRoute === null) {
-		console.error("No route from "+objectToSet.x+","+objectToSet.z+" to "+worldX+","+worldZ);
-	}
-	else{
-		clearRoute.shift();	// Pop the starting position off the array, because we're only interested in where we need to move *to* from here.
-		objectToSet.route = clearRoute;
-		//world.moveTo(player, worldX, worldZ);
+	var clearRoute = world.getPathTo(objectToSet, worldX, worldZ, objectToSet.type);
+	if(clearRoute) {
+		objectToSet.setRoute(clearRoute);
+		
 		clearRoute.forEach(function(step, i) {
 			create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
 		});
 		renderer.render(world);	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
+	}
+	else {
+		console.error("No route for "+objectToSet.type+" "+objectToSet.id+" from "+objectToSet.x+","+objectToSet.z+" to "+worldX+","+worldZ);
 	}
 }
 

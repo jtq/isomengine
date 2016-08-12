@@ -24,4 +24,8 @@ WorldObject.prototype.set = function(roles) {
 	}.bind(this));
 };
 
+WorldObject.prototype.setRoute = function(route) {
+	this.route = route;
+};
+
 module.exports = WorldObject;
