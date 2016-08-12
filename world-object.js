@@ -28,6 +28,24 @@ WorldObject.prototype.set = function(roles) {
 	}.bind(this));
 };
 
+WorldObject.prototype.not = function(roles) {
+	if(!(roles instanceof Array)) {
+		roles = [roles];
+	}
+
+	roles.forEach(function(role) {
+		delete(this.roles[role]);
+	}.bind(this));
+};
+
+WorldObject.prototype.getRoles = function() {
+	var roleNames = Object.keys(this.roles).filter(function(role) {
+		return !!this.roles[role];
+	}.bind(this)).sort();
+	return roleNames;
+};
+
+
 WorldObject.prototype.setRoute = function(route) {
 	this.route = route;
 };
