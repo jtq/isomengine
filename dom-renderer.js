@@ -137,6 +137,16 @@ module.exports = {
 		var obj;
 		Object.keys(world.objects).forEach(function(id) {
 			obj = world.objects[id];
+
+			var objectElement = obj.rendererObject.querySelector("." + this.objectClass);
+
+			var objRoles = obj.getRoles();
+			objRoles = objRoles.join(" ");
+
+			if(objectElement.className !== objRoles) {
+				objectElement.className = objRoles;
+			}
+
 			obj.rendererObject.style.zIndex = (obj.z * world.width) + obj.x;
 			obj.rendererObject.style.transform = "translate(" + this.toViewCoordinatesX(obj.x) + "px, " + this.toViewCoordinatesZ(obj.z) + "px)";
 		}.bind(this));
@@ -153,7 +163,7 @@ module.exports = {
 		});
 		
 		var sprite = this.assets.new(key);
-		sprite.className = this.objectClass + (obj.is("interactable") ? " interactable" : "");
+		sprite.className = obj.getRoles().join(" ");
 
 		el.appendChild(sprite);
 

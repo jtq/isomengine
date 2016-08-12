@@ -7,7 +7,9 @@ function WorldObject(type, x, z, eventHandlers, id) {
 	this.eventHandlers = eventHandlers;
 	this.route = [];
 
-	this.roles = {};
+	this.roles = {
+		'object': true	// Everything is always an "object"
+	};
 }
 
 WorldObject.prototype.setRendererObject = function(obj) {
