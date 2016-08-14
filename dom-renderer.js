@@ -3,17 +3,25 @@ module.exports = {
 	assets: null,
 	viewUnitsPerWorldUnitX: null,
 	viewUnitsPerWorldUnitZ: null,
+	world: null,
+
 	isIsometric: false,
 	animationDuration: 2,
 	interactionEnabled: false,
+	worldUpdatesPerSecond: 6,
+	running: true,
 
-	worldClass: "world",
-	objectBoundsClass: "object-bounds",
-	objectClass: "object",
+	worldClass: "renderer-world",
+	objectBoundsClass: "renderer-object-bounds",
+	objectClass: "renderer-object",
 
-	init: function(element, world, assets) {
+	init: function(element, world, worldUpdatesPerSecond, assets) {
+		this.world = world;
+
 		this.viewUnitsPerWorldUnitX = element.offsetWidth / world.width;
 		this.viewUnitsPerWorldUnitZ = element.offsetHeight / world.depth;
+
+		this.worldUpdatesPerSecond = worldUpdatesPerSecond;
 	
 		this.container = element;
 		this.container.classList.add(this.worldClass);
@@ -44,6 +52,7 @@ module.exports = {
 .${this.objectBoundsClass} {
 	position: absolute;
 	pointer-events: none;
+	transition: transform ${1/this.worldUpdatesPerSecond}s linear 0s;
 }
 
 .${this.objectClass} {
@@ -133,12 +142,62 @@ module.exports = {
 		return Math.floor(length/this.viewUnitsPerWorldUnitZ);
 	},
 
-	render: function(world) {
+	startRenderLoop: function() {
+
+		var frameDelay = 1000/this.worldUpdatesPerSecond;
+
+		this.running = true;
+
+		var prevTimestamp = 0;
+		var leftOver = 0;
+
+		var step = function(timestamp) {
+			var elapsedTime = (timestamp - prevTimestamp);	// Time since last call to requestAnimationFrame()
+			if(running) {
+
+				elapsedTime += leftOver;	// *Running* time since last call to world.step()
+
+				while(elapsedTime >= frameDelay) {
+					this.world.step();	// For each frame that should have been calculated according to the fps, step the world
+					elapsedTime -= frameDelay;
+				}
+
+				// Save any leftover time (< 1 frameDelay) so inconsistent requestAnimationFrame() calls don't result in
+				// inconsistent world-stepping (jerky browser rendering shouldn't make the *world* jerky, just our view of it)
+				leftOver = elapsedTime;
+				
+				// And finally render the final state of the world
+				this.render();
+			}
+			// and record the current timestamp for next time
+			prevTimestamp = timestamp;
+
+			requestAnimationFrame(step);
+		}.bind(this);
+
+		requestAnimationFrame(step);
+	},
+
+	pauseRenderLoop: function() {
+		this.running = false;
+	},
+
+	render: function() {
 		var obj;
-		Object.keys(world.objects).forEach(function(id) {
-			obj = world.objects[id];
-			obj.element.style.zIndex = (obj.z * world.width) + obj.x;
-			obj.element.style.transform = "translate(" + this.toViewCoordinatesX(obj.x) + "px, " + this.toViewCoordinatesZ(obj.z) + "px)";
+		Object.keys(this.world.objects).forEach(function(id) {
+			obj = this.world.objects[id];
+
+			var objectElement = obj.rendererObject.querySelector("." + this.objectClass);
+
+			var objRoles = obj.getRoles();
+			objRoles = objRoles.join(" ");
+
+			if(objectElement.className !== objRoles) {
+				objectElement.className = objRoles;
+			}
+
+			obj.rendererObject.style.zIndex = (obj.z * this.world.width) + obj.x;
+			obj.rendererObject.style.transform = "translate(" + this.toViewCoordinatesX(obj.x) + "px, " + this.toViewCoordinatesZ(obj.z) + "px)";
 		}.bind(this));
 	},
 
@@ -153,7 +212,8 @@ module.exports = {
 		});
 		
 		var sprite = this.assets.new(key);
-		sprite.className = this.objectClass + (obj.is("interactable") ? " interactable" : "");
+		obj.set(this.objectClass);
+		sprite.className = obj.getRoles().join(" ");
 
 		el.appendChild(sprite);
 

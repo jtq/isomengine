@@ -19,12 +19,17 @@ body {
 	<div class="controls">
 		<button onclick="renderer.setIsometric(true);">Isometric</button>
 		<button onclick="renderer.setIsometric(false);">Flat</button>
+
+		<button onclick="pause();">Pause</button>
+		<button onclick="play();">Play</button>
 	</div>
 
 	<script>
 
 var world, container, renderer, assets, pathfinder, player;	// Convenience in debugging
 var WorldObject, Chest, Player;
+
+var running = true;
 
 function create(id, Type, x, z, colour, eventHandlers) {
 	var obj, stringName;
@@ -37,9 +42,9 @@ function create(id, Type, x, z, colour, eventHandlers) {
 		obj = new WorldObject(stringName, x, z, eventHandlers, id);
 	}
 	
-	obj.element = renderer.createObjectElement(stringName, colour, obj, eventHandlers);
+	obj.setRendererObject(renderer.createObjectElement(stringName, colour, obj, eventHandlers));
 
-	container.appendChild(obj.element);
+	container.appendChild(obj.rendererObject);
 	world.add(obj);
 
 	return obj;
@@ -48,21 +53,28 @@ function create(id, Type, x, z, colour, eventHandlers) {
 function setPathTo(objectToSet, worldX, worldZ) {
 	world.getBy("type", "clearroute").forEach(function(obj) {
 		world.remove(obj);
-		container.removeChild(obj.element);
+		container.removeChild(obj.rendererObject);
 	});
-	var clearRoute = pathfinder.findClear([objectToSet.x, objectToSet.z], [worldX, worldZ], ["player"]);
-	if(clearRoute === null) {
-		console.error("No route from "+objectToSet.x+","+objectToSet.z+" to "+worldX+","+worldZ);
-	}
-	else{
-		clearRoute.shift();	// Pop the starting position off the array, because we're only interested in where we need to move *to* from here.
-		objectToSet.route = clearRoute;
-		//world.moveTo(player, worldX, worldZ);
+	var clearRoute = world.getPathTo(objectToSet, worldX, worldZ, objectToSet.type);
+	if(clearRoute) {
+		objectToSet.setRoute(clearRoute);
+
 		clearRoute.forEach(function(step, i) {
 			create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
 		});
-		renderer.render(world);	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
+		renderer.render();	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
 	}
+	else {
+		console.error("No route for "+objectToSet.type+" "+objectToSet.id+" from "+objectToSet.x+","+objectToSet.z+" to "+worldX+","+worldZ);
+	}
+}
+
+function pause() {
+	running = false;
+}
+
+function play() {
+	running = true;
 }
 
 require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfinder.js', '../world-object.js', '../chest.js', '../player.js'], function(World, Renderer, Assets, Pathfinder, worldObjectClass, chestClass, playerClass) {
@@ -76,7 +88,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 	Chest = chestClass;
 	Player = playerClass;
 
-	renderer.init(container, world, assets);
+	renderer.init(container, world, 6, assets);
 
 	player = create("player", Player, 1, 0, "#0080ff");
 
@@ -126,7 +138,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 
 		/*world.getBy("type", "route").forEach(function(obj) {
 			world.remove(obj);
-			container.removeChild(obj.element);
+			container.removeChild(obj.rendererObject);
 		});
 		var naiveRoute = pathfinder.findDirect([player.x, player.z], [worldX, worldZ]);
 		naiveRoute.forEach(function(step, i) {
@@ -136,19 +148,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		setPathTo(player, worldX, worldZ);
 	});
 
-	var frame = 0;
-
-	renderer.render(world);
-
-	requestAnimationFrame(function step() {
-		frame++;
-
-		if(frame % 10 === 0) {
-			world.step();
-			renderer.render(world);
-		}
-		requestAnimationFrame(step);
-	});
+	renderer.startRenderLoop();
 
 	setTimeout(function() {
 		renderer.setIsometric(true);
