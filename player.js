@@ -11,8 +11,12 @@ Player.prototype.constructor = Player;
 
 Player.prototype.step = function(world) {
 	if(this.route.length) {
+		this.set('moving');
 		nextStep = this.route.shift();
 		world.moveTo(this, nextStep.x, nextStep.z);
+	}
+	else {
+		this.not('moving');
 	}
 };
 
