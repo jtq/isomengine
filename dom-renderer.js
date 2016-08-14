@@ -153,7 +153,7 @@ module.exports = {
 
 		var step = function(timestamp) {
 			var elapsedTime = (timestamp - prevTimestamp);	// Time since last call to requestAnimationFrame()
-			if(running) {
+			if(this.running) {
 
 				elapsedTime += leftOver;	// *Running* time since last call to world.step()
 
@@ -176,6 +176,10 @@ module.exports = {
 		}.bind(this);
 
 		requestAnimationFrame(step);
+	},
+
+	unpauseRenderLoop: function() {
+		this.running = true;
 	},
 
 	pauseRenderLoop: function() {
