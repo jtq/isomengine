@@ -62,7 +62,7 @@ function setPathTo(objectToSet, worldX, worldZ) {
 		clearRoute.forEach(function(step, i) {
 			create("clearroute"+i, "clearroute", step.x, step.z, "transparent");
 		});
-		renderer.render(world);	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
+		renderer.render();	// Render immediately after create, to avoid leaving un-positioned objects at 0,0 for a frame
 	}
 	else {
 		console.error("No route for "+objectToSet.type+" "+objectToSet.id+" from "+objectToSet.x+","+objectToSet.z+" to "+worldX+","+worldZ);
@@ -88,7 +88,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 	Chest = chestClass;
 	Player = playerClass;
 
-	renderer.init(container, world, assets);
+	renderer.init(container, world, 6, assets);
 
 	player = create("player", Player, 1, 0, "#0080ff");
 
@@ -148,22 +148,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		setPathTo(player, worldX, worldZ);
 	});
 
-	var frame = 0;
-
-	renderer.render(world);
-
-	requestAnimationFrame(function step() {
-
-		if(running) {
-			frame++;
-
-			if(frame % 10 === 0) {
-				world.step();
-				renderer.render(world);
-			}
-		}
-		requestAnimationFrame(step);
-	});
+	renderer.startRenderLoop();
 
 	setTimeout(function() {
 		renderer.setIsometric(true);
