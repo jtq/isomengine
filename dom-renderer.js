@@ -7,9 +7,9 @@ module.exports = {
 	animationDuration: 2,
 	interactionEnabled: false,
 
-	worldClass: "world",
-	objectBoundsClass: "object-bounds",
-	objectClass: "object",
+	worldClass: "renderer-world",
+	objectBoundsClass: "renderer-object-bounds",
+	objectClass: "renderer-object",
 
 	init: function(element, world, assets) {
 		this.viewUnitsPerWorldUnitX = element.offsetWidth / world.width;
@@ -163,6 +163,7 @@ module.exports = {
 		});
 		
 		var sprite = this.assets.new(key);
+		obj.set(this.objectClass);
 		sprite.className = obj.getRoles().join(" ");
 
 		el.appendChild(sprite);
