@@ -93,8 +93,9 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 		var chest = create("chest"+i, Chest, x, z, "#308000", {
 			"click": function(e) {
 				if(renderer.interactionEnabled) {
-					if(Math.abs(player.x - this.x) + Math.abs(player.z - this.z) === 1 ) {
+					if(world.manhattanDistance(player, this) === 1 ) {
 						e.stopPropagation();
+						this.activate();
 						alert("Clicked " + this.type + " " + this.id + "@[" + this.x + "," + this.z + "]");
 					}
 					else {
