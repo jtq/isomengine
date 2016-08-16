@@ -72,6 +72,13 @@ module.exports = {
 	transform: translate(50%, 50%) scale(1.25);
 }
 
+.${this.objectClass}.activated {
+	animation-name: opening !important;
+	animation-iteration-count: 1;
+	animation-duration: 0.15s;
+	animation-fill-mode: both;
+}
+
 .isometric .${this.objectClass} {
 	transform: rotateZ(-45deg) scaleY(2);
 	right: 27.5%;
@@ -81,6 +88,15 @@ module.exports = {
 }
 .isometric .${this.objectClass}.interactable:hover {
 	transform: rotateZ(-45deg) scaleY(2) scale(1.25);
+}
+
+@keyframes opening {
+  0% { background-image: url("chest-1.png"); }
+  20% { background-image: url("chest-2.png"); }
+  40% { background-image: url("chest-3.png"); }
+  60% { background-image: url("chest-4.png"); }
+  80% { background-image: url("chest-5.png"); }
+  100% { background-image: url("chest-6.png"); }
 }
 `;
 		document.head.appendChild(style);

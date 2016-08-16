@@ -96,7 +96,7 @@ require(['../world.js', '../dom-renderer.js', '../asset-library.js', '../pathfin
 					if(world.manhattanDistance(player, this) === 1 ) {
 						e.stopPropagation();
 						this.activate();
-						alert("Clicked " + this.type + " " + this.id + "@[" + this.x + "," + this.z + "]");
+						console.log("Clicked " + this.type + " " + this.id + "@[" + this.x + "," + this.z + "]");
 					}
 					else {
 						setPathTo(player, this.x, this.z);
