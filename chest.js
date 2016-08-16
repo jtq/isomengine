@@ -11,5 +11,9 @@ function Chest(x, z, eventHandlers, id) {
 Chest.prototype = Object.create(WorldObject.prototype);
 Chest.prototype.constructor = Chest;
 
+Chest.prototype.activate = function() {
+	this.set("activated");
+};
+
 
 module.exports = Chest;

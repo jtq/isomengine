@@ -12,7 +12,7 @@ module.exports = {
 	"chest": {
 		"width": 1,
 		"depth": 1,
-		"sprite": "chest.png"
+		"sprite": "chest-1.png"
 	},
 	"route": {
 		"width": 1,
